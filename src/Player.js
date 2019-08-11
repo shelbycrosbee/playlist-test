@@ -1,11 +1,11 @@
 import React from 'react';
-
+import axios from 'axios'
+import './App.css'
 
 class Player extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      token: "BQDI7oOFwnA5G_wu50g0TL-J7hdQpP_35EVnND4hAz2meknT1tdUEGcrPBb25YhcaWCdu2mPnB0RR0bWDqmCl1Ze0EssAyCkdGlYiGz7NsVDHEkSEdGL-nMXbCXntTA8KmNTJ0SJdtSyP5ymastq07tbBBkptvWUq_S54kKKgnk8IGdyiiphZ2g5Tw",
       deviceId: "",
       loggedIn: false,
       error: "",
@@ -19,13 +19,17 @@ class Player extends React.Component {
     this.playerCheckInterval = null;
   }
 
+
+
+
+
   checkForPlayer() {
     const { token } = this.state;
 
     if (window.Spotify !== null) {
       this.player = new window.Spotify.Player({
         name: "Code School's Spotify Player",
-        getOAuthToken: cb => { cb(token); },
+        getOAuthToken: cb => { cb(this.props.token); },
       });
       this.createEventHandlers();
       clearInterval(this.playerCheckInterval);
@@ -33,7 +37,32 @@ class Player extends React.Component {
       this.player.connect();
     }
   }
-
+  onStateChanged(state) {
+    // if we're no longer listening to music, we'll get a null state.
+    if (state !== null) {
+      console.log(state.track_window);
+      debugger;
+      const {
+        current_track: currentTrack,
+        position,
+        duration,
+      } = state.track_window;
+      const trackName = currentTrack.name;
+      const albumName = currentTrack.album.name;
+      const artistName = currentTrack.artists
+        .map(artist => artist.name)
+        .join(", ");
+      const playing = !state.paused;
+      this.setState({
+        position,
+        duration,
+        trackName,
+        albumName,
+        artistName,
+        playing
+      });
+    }
+  }
 
   createEventHandlers() {
     this.player.on('initialization_error', e => { console.error(e); });
@@ -43,29 +72,82 @@ class Player extends React.Component {
     });
     this.player.on('account_error', e => { console.error(e); });
     this.player.on('playback_error', e => { console.error(e); });
-  
+
     // Playback status updates
-    this.player.on('player_state_changed', state => { console.log(state); });
-  
+    this.player.on('player_state_changed', state => this.onStateChanged(state));
+
     // Ready
     this.player.on('ready', data => {
       let { device_id } = data;
       console.log("Let the music play on!");
       this.setState({ deviceId: device_id });
     });
+
+    this.player.on('ready', async data => {
+      let { device_id } = data;
+      console.log("Let the music play on!");
+      await this.setState({ deviceId: device_id });
+      this.transferPlaybackHere();
+    });
   }
 
 
   handleLogin() {
-    if (this.state.token !== "") {
+    if (this.props.token !== "") {
       this.setState({ loggedIn: true });
       this.playerCheckInterval = setInterval(() => this.checkForPlayer(), 1000);
     }
+
+    axios.get(
+      'https://api.spotify.com/v1/me', {
+        headers: {
+          Authorization: `Bearer ${this.props.token}`
+        }
+      }
+    )
+      .then(response => {
+        console.log(response)
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  }
+
+  transferPlaybackHere() {
+    const { deviceId } = this.state;
+    axios({
+      method: 'put',
+      url: "https://api.spotify.com/v1/me/player",
+      data: {
+        device_ids: [deviceId],
+        play: true
+      },
+      headers: {
+        Authorization: `Bearer ${this.props.token}`
+      }
+    })
+      .then(response => {
+        console.log(response)
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  }
+
+  onPrevClick() {
+    this.player.previousTrack();
+  }
+
+  onPlayClick() {
+    this.player.togglePlay();
+  }
+
+  onNextClick() {
+    this.player.nextTrack();
   }
 
   render() {
     const {
-      token,
       loggedIn,
       artistName,
       trackName,
@@ -76,11 +158,12 @@ class Player extends React.Component {
       playing,
     } = this.state;
 
+
+
     return (
       <div className="App">
-        <div className="App-header">
-          <h2>Now Playing</h2>
-          <p>A Spotify Web Playback API Demo.</p>
+        <div>
+          <h3>Code School Spotify Player</h3>
         </div>
 
         {error && <p>Error: {error}</p>}
@@ -90,17 +173,19 @@ class Player extends React.Component {
             <p>Artist: {artistName}</p>
             <p>Track: {trackName}</p>
             <p>Album: {albumName}</p>
+            <p>
+              <button onClick={() => this.onPrevClick()}>Previous</button>
+              <button onClick={() => this.onPlayClick()}>{playing ? "Pause" : "Play"}</button>
+              <button onClick={() => this.onNextClick()}>Next</button>
+            </p>
           </div>)
           :
           (<div>
             <p className="App-intro">
-              Enter your Spotify access token. Get it from{" "}
-              <a href="https://beta.developer.spotify.com/documentation/web-playback-sdk/quick-start/#authenticating-with-spotify">
-                here
-            </a>.
+              Enter your Spotify access token.
           </p>
             <p>
-              <input type="text" value={token} onChange={e => this.setState({ token: e.target.value })} />
+              <input type="text" value={this.props.token} onChange={e => this.setState({ token: e.target.value })} />
             </p>
             <p>
               <button onClick={() => this.handleLogin()}>Go</button>

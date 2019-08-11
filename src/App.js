@@ -16,7 +16,9 @@ const scopes = [
   "user-read-playback-state",
   'user-read-email',
   'user-read-private',
-  'user-read-currently-playing'
+  'user-read-currently-playing',
+  'streaming',
+  'user-modify-playback-state'
 ];
 const hash = window.location.hash
   .substring(1)
@@ -35,8 +37,9 @@ class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      token: ''
+      token: '',
     }
+
   }
   componentDidMount() {
 
@@ -46,24 +49,8 @@ class App extends React.Component {
         token: _token
       });
     }
-
-   axios.get(
-      'https://api.spotify.com/v1/me', {
-      headers: {
-        Authorization: `Bearer ${_token}`
-      }
-    }
-    )
-      .then(response => {
-        console.log(response)
-      
-      })
-
-      .catch(error => {
-        console.log(error)
-      })
-  
   }
+
   render() {
     return (
       <div>
@@ -77,7 +64,9 @@ class App extends React.Component {
               Login to Spotify
         </a>
           )}
-          <Player />
+          <Player 
+          token = {this.state.token}
+          />
 
         </header>
       </div>
