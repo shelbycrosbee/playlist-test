@@ -15,7 +15,8 @@ const scopes = [
   "user-read-currently-playing",
   "user-read-playback-state",
   'user-read-email',
-  'user-read-private'
+  'user-read-private',
+  'user-read-currently-playing'
 ];
 const hash = window.location.hash
   .substring(1)
@@ -47,7 +48,7 @@ class App extends React.Component {
     }
 
    axios.get(
-      'https://api.spotify.com/v1/users/e3itsm9xo2go4zn5j2lgmkg5g', {
+      'https://api.spotify.com/v1/me/player/currently-playing', {
       headers: {
         Authorization: `Bearer ${_token}`
       }
