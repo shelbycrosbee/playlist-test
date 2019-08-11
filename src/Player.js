@@ -41,7 +41,6 @@ class Player extends React.Component {
     // if we're no longer listening to music, we'll get a null state.
     if (state !== null) {
       console.log(state.track_window);
-      debugger;
       const {
         current_track: currentTrack,
         position,
@@ -134,6 +133,32 @@ class Player extends React.Component {
       })
   }
 
+  joinButton() {
+    const { deviceId } = this.state;
+    axios({
+      method: 'put',
+      url: "https://api.spotify.com/v1/me/player/play",
+      data: {
+        device_ids: [deviceId],
+        play: true,
+        context_uri: "spotify:playlist:2GJ0HZwHHPaJ4J955ultN0",
+        offset: {
+          position: 0
+        },
+        position_ms: 0
+      },
+      headers: {
+        Authorization: `Bearer ${this.props.token}`
+      }
+    })
+      .then(response => {
+        console.log(response)
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  }
+
   onPrevClick() {
     this.player.previousTrack();
   }
@@ -177,6 +202,7 @@ class Player extends React.Component {
               <button onClick={() => this.onPrevClick()}>Previous</button>
               <button onClick={() => this.onPlayClick()}>{playing ? "Pause" : "Play"}</button>
               <button onClick={() => this.onNextClick()}>Next</button>
+              <button onClick={() => this.joinButton()}>Make Shelby Mad</button>
             </p>
           </div>)
           :
