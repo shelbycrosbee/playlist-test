@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-// import Playlist from './Playlist'
+import Player from './Player'
 import axios from 'axios'
 
 
@@ -48,7 +48,7 @@ class App extends React.Component {
     }
 
    axios.get(
-      'https://api.spotify.com/v1/me/player/currently-playing', {
+      'https://api.spotify.com/v1/me', {
       headers: {
         Authorization: `Bearer ${_token}`
       }
@@ -66,7 +66,7 @@ class App extends React.Component {
   }
   render() {
     return (
-      <div className="App">
+      <div>
         <header className="App-header">
 
           {!this.state.token && (
@@ -77,9 +77,8 @@ class App extends React.Component {
               Login to Spotify
         </a>
           )}
-          {/* {this.state.token && (
-        // Spotify Player Will Go Here In the Next Step
-      )} */}
+          <Player />
+
         </header>
       </div>
     );
