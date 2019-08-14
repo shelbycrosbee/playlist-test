@@ -134,21 +134,24 @@ class Player extends React.Component {
   }
 
 
- 
 
-  joinButton() {
+
+  async joinButton() {
     const { deviceId } = this.state;
-    axios({
+      const data = await axios.get('/playlist', {
+        params: {spotify_id: 'saralouwho'}
+      })
+    await axios({
       method: 'put',
       url: "https://api.spotify.com/v1/me/player/play",
       data: {
         device_ids: [deviceId],
         play: true,
-        context_uri: "spotify:playlist:2GJ0HZwHHPaJ4J955ultN0",
+        context_uri: data.data.playlist.uri_link,
         offset: {
-          position: 0
+          position: data.data.playlist.position
         },
-        position_ms: 0
+        position_ms: data.data.playlist.progress_ms
       },
       headers: {
         Authorization: `Bearer ${this.props.token}`
@@ -171,13 +174,13 @@ class Player extends React.Component {
         Authorization: `Bearer ${this.props.token}`
       }
     })
-    .then(response => {
-      console.log(response)
-    })
-    .catch(error => {
-      console.log(error)
-    })
-    
+      .then(response => {
+        console.log(response)
+      })
+      .catch(error => {
+        console.log(error)
+      })
+
   }
 
   onPlayClick() {
