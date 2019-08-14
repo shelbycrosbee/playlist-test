@@ -133,6 +133,9 @@ class Player extends React.Component {
       })
   }
 
+
+ 
+
   joinButton() {
     const { deviceId } = this.state;
     axios({
@@ -161,6 +164,20 @@ class Player extends React.Component {
 
   onPrevClick() {
     this.player.previousTrack();
+    axios({
+      method: 'get',
+      url: 'https://api.spotify.com/v1/me/following/contains',
+      headers: {
+        Authorization: `Bearer ${this.props.token}`
+      }
+    })
+    .then(response => {
+      console.log(response)
+    })
+    .catch(error => {
+      console.log(error)
+    })
+    
   }
 
   onPlayClick() {

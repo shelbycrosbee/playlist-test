@@ -18,7 +18,8 @@ const scopes = [
   'user-read-private',
   'user-read-currently-playing',
   'streaming',
-  'user-modify-playback-state'
+  'user-modify-playback-state',
+  'user-follow-read'
 ];
 const hash = window.location.hash
   .substring(1)
@@ -64,8 +65,8 @@ class App extends React.Component {
               Login to Spotify
         </a>
           )}
-          <Player 
-          token = {this.state.token}
+          <Player
+            token={this.state.token}
           />
 
         </header>
