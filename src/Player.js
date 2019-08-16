@@ -137,6 +137,7 @@ class Player extends React.Component {
 
 
   async joinButton() {
+    const currentTime = Date.now();
     const { deviceId } = this.state;
       const data = await axios.get('/playlist', {
         params: {spotify_id: 'saralouwho'}
