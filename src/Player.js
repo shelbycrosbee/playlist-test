@@ -153,6 +153,7 @@ class Player extends React.Component {
       headers: {
         Authorization: `Bearer ${this.props.token}`
       }
+      
     })
       .then(response => {
         console.log(response)
